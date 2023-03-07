@@ -15,6 +15,7 @@ class _CronometroState extends State<Cronometro> {
   bool estaCorriendo = false;
   late Timer timer;
   List vueltas = [];
+  
 
   void iniciarCronometro() {
     if (!estaCorriendo) {
@@ -31,8 +32,8 @@ class _CronometroState extends State<Cronometro> {
     estaCorriendo = false;
   }
 
-  String formatearTiempo() {
-    Duration duracion = Duration(milliseconds: this.milisegundos);
+  String formatearTiempo(Duration duracion) {
+    
 
     String dosValores(int valor) {
       return valor >= 10 ? "$valor" : "0$valor";
@@ -51,13 +52,9 @@ class _CronometroState extends State<Cronometro> {
 
     return ("$horas:$minutos:$segundos:$borrar");
   }
+  Duration get duracion => Duration(milliseconds: milisegundos);
 
-  void addLaps() {
-    String vuelta = formatearTiempo();
-    setState(() {
-      vueltas.add(vuelta);
-    });
-  }
+
 
   @override
   void dispose() {
@@ -72,8 +69,8 @@ class _CronometroState extends State<Cronometro> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          formatearTiempo(),
-          style: TextStyle(fontSize: 50),
+          formatearTiempo(duracion),
+          style: const TextStyle(fontSize: 60, color: Colors.red),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -82,48 +79,50 @@ class _CronometroState extends State<Cronometro> {
                 child: Icon(
                   Icons.not_started,
                   color: Colors.red,
-                  size: 65,
+                  size: 45,
                 ),
                 onPressed: iniciarCronometro),
             CupertinoButton(
                 child: Icon(
                   Icons.stop,
                   color: Colors.red,
-                  size: 70,
+                  size: 50,
                 ),
                 onPressed: detenerCronometro),
-          ],
-        ),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          CupertinoButton(
+                CupertinoButton(
               child: Icon(
                 Icons.restart_alt_sharp,
                 color: Colors.red,
-                size: 70,
+                size: 50,
               ),
               onPressed: () {
                 this.milisegundos = 0;
                 setState(() {});
                 vueltas = [];
               }),
+          ],
+        ),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           CupertinoButton(
+                onPressed: estaCorriendo ? () {vueltas.add(duracion);} : null,
               child: Icon(
-                Icons.arrow_downward,
+                Icons.flag_rounded,
                 color: Colors.red,
-                size: 70,
+                size: 50,
               ),
-              onPressed: () {
-                addLaps();
-              }),
+              ),
         ]),
         Container(
+          
           height: 400,
           decoration: BoxDecoration(
+              
               color: Colors.amber[300],
-              borderRadius: BorderRadius.circular(40)),
+              borderRadius: BorderRadius.circular(40)), 
           child: ListView.builder(
             itemCount: vueltas.length,
             itemBuilder: (context, index) {
+              final diff = index == 0 ? vueltas[index] : vueltas[index] - vueltas[index - 1];
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -131,11 +130,15 @@ class _CronometroState extends State<Cronometro> {
                   children: [
                     Text(
                       'Lap n° ${index + 1}',
-                      style: TextStyle(color: Colors.black, fontSize: 16.0),
+                      style: TextStyle(color: Colors.red, fontSize: 16.0),
                     ),
                     Text(
-                      '${vueltas[index]}',
-                      style: TextStyle(color: Colors.black, fontSize: 16.0),
+                      '+${formatearTiempo(diff)}',
+                      style: TextStyle(color: Colors.red, fontSize: 16.0),
+                    ),
+                    Text(
+                      formatearTiempo(vueltas[index]),
+                      style: TextStyle(color: Colors.red, fontSize: 16.0),
                     )
                   ],
                 ),
